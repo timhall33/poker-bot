@@ -1,0 +1,23 @@
+.deal-button-container {
+    position: absolute; 
+    top: 54%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .deal-button {
+    background-color: #007bff; 
+    color: #fff; 
+    font-size: 24px; 
+    padding: 16px 32px;
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    transition: background-color 0.3s ease;
+  }
+
+  .deal-button:hover {
+    background-color: #0056b3; /* Change background color on hover */
+  }
+
+  

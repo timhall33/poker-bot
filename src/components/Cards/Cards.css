@@ -1,0 +1,16 @@
+.card-container {
+  position: absolute;
+  top: 80%; /* Vertically center the container */
+  left: 50%; /* Horizontally center the container */
+  transform: translate(-50%, -50%); /* Adjust the centering using transform */
+  display: flex; /* Use flexbox layout */
+  justify-content: center; /* Horizontally center the cards within the container */
+  align-items: center; /* Vertically center the cards within the container */
+}
+  
+  .card-image {
+    width: 50px; /* Set the width of the card images */
+    height: auto; /* Automatically adjust the height based on the width */
+    margin-right: 10px; /* Add margin between the cards */
+  }
+  
