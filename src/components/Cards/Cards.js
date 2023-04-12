@@ -56,16 +56,35 @@ const cardImages = {
     52: "/images/ace_of_spades2.png"
   };
   
-  export const generatePlayersCards = (nums) => {
-    const card1 = cardImages[nums[0]];
-    const card2 = cardImages[nums[1]]; 
+  export const generatePlayersCards = (nums, num1, num2) => {
+    const card1 = cardImages[nums[num1]];
+    const card2 = cardImages[nums[num2]]; 
     return (
       <div className='card-container'>
-        <img className = 'card-image' src={process.env.PUBLIC_URL + card1} alt={`Card ${nums[0]}`} /> 
-        <img className = 'card-image' src={process.env.PUBLIC_URL + card2} alt={`Card ${nums[1]}`} />
+        <img className = 'card-image' src={process.env.PUBLIC_URL + card1} alt={`Card ${nums[num1]}`} /> 
+        <img className = 'card-image' src={process.env.PUBLIC_URL + card2} alt={`Card ${nums[num2]}`} />
       </div>
     );
   };
+
+
+  export const generateMiddleCards = (nums) => {
+    const card1 = cardImages[nums[47]];
+    const card2 = cardImages[nums[48]]; 
+    const card3 = cardImages[nums[49]];
+    const card4 = cardImages[nums[50]]; 
+    const card5 = cardImages[nums[51]];
+    return (
+      <div className='card-container'>
+        <img className = 'card-image' src={process.env.PUBLIC_URL + card1} alt={`Card ${nums[47]}`} /> 
+        <img className = 'card-image' src={process.env.PUBLIC_URL + card2} alt={`Card ${nums[48]}`} />
+        <img className = 'card-image' src={process.env.PUBLIC_URL + card3} alt={`Card ${nums[49]}`} /> 
+        <img className = 'card-image' src={process.env.PUBLIC_URL + card4} alt={`Card ${nums[50]}`} />
+        <img className = 'card-image' src={process.env.PUBLIC_URL + card5} alt={`Card ${nums[51]}`} /> 
+      </div>
+    );
+  };
+
 
   export function generateRandomNumbers(num) {
     const numbers = Array.from({length: 52}, (_, i) => i + 1);
@@ -83,3 +102,15 @@ const cardImages = {
     return array;
   }
 
+  const CardContainer = () => {
+
+    return (
+      <div>
+        <div id="bot-cards"></div>
+        <div id="my-cards"></div>
+        <div id="middle-cards"></div>
+      </div>
+    );
+  };
+  
+  export default CardContainer;
