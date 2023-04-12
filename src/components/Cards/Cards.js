@@ -56,11 +56,12 @@ const cardImages = {
     52: "/images/ace_of_spades2.png"
   };
   
-  export const generatePlayersCards = (nums, num1, num2) => {
+  export const generatePlayersCards = (nums, num1, num2, isBot) => {
     const card1 = cardImages[nums[num1]];
     const card2 = cardImages[nums[num2]]; 
+    const cardContainerClass = isBot ? 'bot-cards' : 'my-cards';
     return (
-      <div className='card-container'>
+      <div className={cardContainerClass}>
         <img className = 'card-image' src={process.env.PUBLIC_URL + card1} alt={`Card ${nums[num1]}`} /> 
         <img className = 'card-image' src={process.env.PUBLIC_URL + card2} alt={`Card ${nums[num2]}`} />
       </div>
@@ -68,22 +69,51 @@ const cardImages = {
   };
 
 
-  export const generateMiddleCards = (nums) => {
+  export const generateMiddleCards = (nums, count) => {
+    console.log("Count: " + count);
     const card1 = cardImages[nums[47]];
     const card2 = cardImages[nums[48]]; 
     const card3 = cardImages[nums[49]];
     const card4 = cardImages[nums[50]]; 
     const card5 = cardImages[nums[51]];
-    return (
-      <div className='card-container'>
-        <img className = 'card-image' src={process.env.PUBLIC_URL + card1} alt={`Card ${nums[47]}`} /> 
-        <img className = 'card-image' src={process.env.PUBLIC_URL + card2} alt={`Card ${nums[48]}`} />
-        <img className = 'card-image' src={process.env.PUBLIC_URL + card3} alt={`Card ${nums[49]}`} /> 
-        <img className = 'card-image' src={process.env.PUBLIC_URL + card4} alt={`Card ${nums[50]}`} />
-        <img className = 'card-image' src={process.env.PUBLIC_URL + card5} alt={`Card ${nums[51]}`} /> 
-      </div>
-    );
+  
+    let renderedCards;
+    if (count === 0) {
+      renderedCards = (
+        <div className='middle-cards'></div>
+      );
+    } else if (count === 1) {
+      renderedCards = (
+        <div className='middle-cards'>
+          <img className='card-image' src={process.env.PUBLIC_URL + card1} alt={`Card ${nums[47]}`} /> 
+          <img className='card-image' src={process.env.PUBLIC_URL + card2} alt={`Card ${nums[48]}`} />
+          <img className='card-image' src={process.env.PUBLIC_URL + card3} alt={`Card ${nums[49]}`} /> 
+        </div>
+      );
+    } else if (count === 2) {
+      renderedCards = (
+        <div className='middle-cards'>
+          <img className='card-image' src={process.env.PUBLIC_URL + card1} alt={`Card ${nums[47]}`} /> 
+          <img className='card-image' src={process.env.PUBLIC_URL + card2} alt={`Card ${nums[48]}`} />
+          <img className='card-image' src={process.env.PUBLIC_URL + card3} alt={`Card ${nums[49]}`} /> 
+          <img className='card-image' src={process.env.PUBLIC_URL + card4} alt={`Card ${nums[50]}`} />
+        </div>
+      );
+    } else {
+      renderedCards = (
+        <div className='middle-cards'>
+          <img className='card-image' src={process.env.PUBLIC_URL + card1} alt={`Card ${nums[47]}`} /> 
+          <img className='card-image' src={process.env.PUBLIC_URL + card2} alt={`Card ${nums[48]}`} />
+          <img className='card-image' src={process.env.PUBLIC_URL + card3} alt={`Card ${nums[49]}`} /> 
+          <img className='card-image' src={process.env.PUBLIC_URL + card4} alt={`Card ${nums[50]}`} />
+          <img className='card-image' src={process.env.PUBLIC_URL + card5} alt={`Card ${nums[51]}`} /> 
+        </div>
+      );
+    }
+  
+    return renderedCards;
   };
+  
 
 
   export function generateRandomNumbers(num) {
@@ -101,16 +131,3 @@ const cardImages = {
     }
     return array;
   }
-
-  const CardContainer = () => {
-
-    return (
-      <div>
-        <div id="bot-cards"></div>
-        <div id="my-cards"></div>
-        <div id="middle-cards"></div>
-      </div>
-    );
-  };
-  
-  export default CardContainer;
