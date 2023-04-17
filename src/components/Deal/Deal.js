@@ -1,8 +1,9 @@
-import { generatePlayersCards , generateRandomNumbers, generateMiddleCards} from '../Cards/Cards';
+import { generatePlayersCards , generateRandomNumbers, generateMiddleCards, getMiddleCards, getHandCards} from '../Cards/Cards';
 import ButtonOptions from '../BettingOptions/BettingOptions';
 import './Deal.css';
 import React, { useState } from 'react';
 import ShowCardsButton from '../ShowCardsButton/ShowCardsButton';
+import { determineWinner, getHandRank } from '../../GameRules/GameRules'; 
 
 const DealButton = () => {
   const [myCards, setMyCards] = useState(null);
@@ -19,16 +20,39 @@ const DealButton = () => {
     const newNums = generateRandomNumbers();
     const newMyCards = generatePlayersCards(newNums, 0, 1, false);
     const newBotCards = generatePlayersCards(newNums, 2, 3, true);
+    const myCardLetters = getHandCards(newNums, 0, 1);
+    const botCardLetters = getHandCards(newNums, 2, 3);
+    const middleCardLetters = getMiddleCards(newNums);
+    const myFullHand = myCardLetters.concat(middleCardLetters);
+    const botFullHand = botCardLetters.concat(middleCardLetters);
 
+    
+    const hand = ['4D', 'AS', 'AD', '3H', '2C', '4C', '2D'];
+    const myRank = getHandRank(myFullHand)
+    const botRank = getHandRank(botFullHand)
+    console.log("myRank: " + myRank);
+    console.log("botRank: " + botRank);
+    const winner = determineWinner(myFullHand, botFullHand);
+
+   /*
+    if (determineWinner(myRank, botRank) === 1) {
+      console.log("You Win!")
+    } else if (determineWinner(myRank, botRank) === 2) {
+      console.log("Bot Wins!")
+    } else {
+      console.log("Its a tie")
+    }
+*/
     setMyCards(newMyCards);
     setBotCards(newBotCards);
     setShowOpponentCards(false);
     setMiddleCardsShown(0);
     setNums(newNums)
+
+
 };
 
 const handleCheckClick = () => {
-  console.log("check button clicked");
   setMiddleCardsShown(prevCount => prevCount + 1);
   const newMiddleCards = generateMiddleCards(nums, middleCardsShown + 1);
   setMiddleCards(newMiddleCards);
