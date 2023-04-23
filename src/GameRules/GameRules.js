@@ -1,3 +1,6 @@
+import { getPot } from "../components/Money/Money";
+import { player1, player2 } from "../components/StartGame/StartGame";
+
 export function getHandRank(hand) {
     if (hasStraightFlush(hand)) {
         return hasStraightFlush(hand);
@@ -472,22 +475,43 @@ export function determineWinner(hand1, hand2) {
     const handRank1 = getHandRank(hand1);
     const handRank2 = getHandRank(hand2);
     if (handRank1[0] > handRank2[0]) {
-        console.log("hand 1 wins.");
-        return 1;
+        player1.addMoney(getPot());
+        return "You Win!";
     } else if (handRank2[0] > handRank1[0]) {
-        console.log("hand 2 wins.");
-        return 2; 
+        player2.addMoney(getPot());
+        return "Bot wins.";
     } else {
         for (let i = 1; i < handRank1.length; i++) {
             if (handRank1[i] > handRank2[i]) {
                 console.log("hand 1 wins.");
-                return 1;
+                player1.addMoney(getPot());
+                return "You Win!";
             } else if (handRank2[i] > handRank1[i]) {
-                console.log("hand 2 wins.");
-                return 2;
+                player2.addMoney(getPot());
+                return "Bot wins.";
             }
         }
-        console.log("It's a Tie");
-        return 0;
+        player1.addMoney(getPot()/2);
+        player2.addMoney(getPot()/2);
+        return "Tie.";
     }
+}
+
+export function determineWinnerT(hand1, hand2) {
+  const handRank1 = getHandRank(hand1);
+  const handRank2 = getHandRank(hand2);
+  if (handRank1[0] > handRank2[0]) {
+      return 1;
+  } else if (handRank2[0] > handRank1[0]) {
+      return 2;
+  } else {
+      for (let i = 1; i < handRank1.length; i++) {
+          if (handRank1[i] > handRank2[i]) {
+              return 1;
+          } else if (handRank2[i] > handRank1[i]) {
+              return 2;
+          }
+      }
+      return 0;
+  }
 }
