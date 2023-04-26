@@ -55,6 +55,14 @@ const cardImages = {
   'KS': "/images/king_of_spades2.png",
   'AS': "/images/ace_of_spades2.png"
   };
+
+  export function createDeck() {
+    let deck = [];
+    for (let i = 0; i < 52; i++) {
+      deck.push(Object.keys(cardImages)[i])
+    }
+    return deck;
+  }
   
   export const getHandCards = (nums, num1, num2) => {
     const card1 = Object.keys(cardImages)[nums[num1]];

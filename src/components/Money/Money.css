@@ -1,0 +1,67 @@
+/* Add styles for positioning the money box */
+.money-box {
+    position: absolute;
+    top: 22%;
+    left: 15%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    width: fit-content;
+  }
+  
+  .money-box h2 {
+    font-size: 18px;
+    color: #007bff;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .money-box p {
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+  }
+
+  .money-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column; /* Set flex-direction to column to stack items vertically */
+  }
+  
+  .bot-money-box {
+    position: absolute;
+    top: 35%; /* Adjust the top position to place it below the My Money box */
+    left: 15%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    width: fit-content;
+  }
+  
+  .bot-money-box h2 {
+    font-size: 18px;
+    color: #007bff;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .bot-money-box p {
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+  }
+
+  .pot-amount-box {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    background-color: lightgray;
+    padding: 1rem;
+  }
