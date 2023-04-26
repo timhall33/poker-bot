@@ -11,7 +11,7 @@ import RenderMoneyInHand from '../Money/Money';
 import Player from '../Player/Player';
 import { player1, player2 } from '../StartGame/StartGame';
 import { EndRound, endRound } from '../../EndRound/EndRound';
-import { train } from '../../CFR/Cfr';
+import TexasHoldEm from '../../CFR/Cfr';
 
 const DealButton = () => {
   const [myCards, setMyCards] = useState(null);
@@ -45,6 +45,10 @@ const DealButton = () => {
   };
 
   const handleDealClick = () => {
+    const pokerGame = new TexasHoldEm();
+    const numIterations = 1; // Choose the number of iterations to run
+    pokerGame.train(numIterations);
+
     setRoundEnded(false)
     resetPot();
     let startingBet1 = 10

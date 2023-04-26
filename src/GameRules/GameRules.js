@@ -497,9 +497,13 @@ export function determineWinner(hand1, hand2) {
     }
 }
 
-export function determineWinnerT(hand1, hand2) {
-  const handRank1 = getHandRank(hand1);
-  const handRank2 = getHandRank(hand2);
+export function determineWinnerT(hand1, hand2, communityCards) {
+  const fullHand1 = hand1 + "," + communityCards;
+  const fullHand2 = hand2 + "," + communityCards;
+  const fullHand1A = fullHand1.split(',');
+  const fullHand2A = fullHand2.split(',');
+  const handRank1 = getHandRank(fullHand1A);
+  const handRank2 = getHandRank(fullHand2A);
   if (handRank1[0] > handRank2[0]) {
       return 1;
   } else if (handRank2[0] > handRank1[0]) {
@@ -512,6 +516,6 @@ export function determineWinnerT(hand1, hand2) {
               return 2;
           }
       }
-      return 0;
+    return 0;
   }
 }
