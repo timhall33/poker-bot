@@ -1,5 +1,5 @@
-import { createDeck } from "../components/Cards/Cards";
-import { determineWinnerT } from "../GameRules/GameRules";
+const { createDeck } = require("../components/Cards/Cards");
+const { determineWinnerTrain } = require("../GameRules/GameRules");
 
 class TexasHoldEm {
     constructor() {
@@ -7,32 +7,18 @@ class TexasHoldEm {
         this.expected_game_value = 0;
         this.n_cards = 52;
         this.nash_equilibrium = {};
-        // this.current_player = 0; // delete
         this.deck = createDeck();
         this.n_actions = 5; //fold, check/call, raise1, raise2, raise3
         this.smallBlind = 5;
         this.bigBlind = 10;
-        this.player1Bet = 0;
-        this.player2Bet = 0;
         this.startingBalance = 1000;
-        this.pot = this.smallBlind + this.bigBlind
-        this.player1Balance = this.startingBalance;
-        this.player2Balance = this.startingBalance;
         this.player1BuyIns = 0;
         this.player2BuyIns = 0;
-        //this.communityCards = []; // delete
-        /*this.betSizes = [ // change or get rid
-            (2 / 3) * this.startingBalance,
-            2 * this.startingBalance,
-            this.startingBalance
-        ];
-        */
     }
 
     displayResults(expectedGameValue, nodeMap) {
         console.log(`Player 1 expected value: ${expectedGameValue}`);
         console.log(`Player 2 expected value: ${-1 * expectedGameValue}`);
-      
         console.log("\nPlayer 1 strategies:");
         const sortedKeys = Object.keys(nodeMap).sort();
         for (const key of sortedKeys) {
@@ -81,6 +67,7 @@ class TexasHoldEm {
           [], // First betting round (no community cards)
           communityCards.slice(0, 3), // Second betting round (Flop)
           communityCards.slice(0, 4), // Third betting round (Turn)
+          communityCards.slice(0, 5),  // Fourth betting round (River)
           communityCards.slice(0, 5)  // Fourth betting round (River)
         ];
         
@@ -89,31 +76,35 @@ class TexasHoldEm {
 
     train(iterations) {
         let expected_game_value = 0;
-        this.pot = 0;
         for (let i = 0; i < iterations; i++) {
+            let player1Balance = this.startingBalance;
+            let player2Balance = this.startingBalance;
+            let player1Bet = 0;
+            let player2Bet = 0;
             this.shuffleArray(this.deck);
-            const smallBlindPlayer = i % 2 === 0 ? 1 : 2;
-            if (smallBlindPlayer === 1) {
-                this.player1Balance -= this.smallBlind;
-                this.player2Balance -= this.bigBlind;
-                this.player1Bet = this.smallBlind;
-                this.player2Bet = this.bigBlind;
+            const smallBlindPlayer = i % 2 === 0 ? 0 : 1;
+            if (smallBlindPlayer === 0) {
+                player1Balance -= this.smallBlind;
+                player2Balance -= this.bigBlind;
+                player1Bet = this.smallBlind;
+                player2Bet = this.bigBlind;
             } else {
-                this.player1Balance -= this.bigBlind;
-                this.player2Balance -= this.smallBlind;
-                this.player1Bet = this.bigBlind;
-                this.player2Bet = this.smallBlind;
+                player1Balance -= this.bigBlind;
+                player2Balance -= this.smallBlind;
+                player1Bet = this.bigBlind;
+                player2Bet = this.smallBlind;
             }
-            let communityCards = this.dealCommunityCards();
+            let pot = player1Bet + player2Bet;
+            const communityCards = this.dealCommunityCards();
             const player1Cards = [this.deck[0], this.deck[1]];
             const player2Cards = [this.deck[2], this.deck[3]];  
-            expected_game_value += this.cfr('', 1, 1, 0, this.pot, communityCards, player1Cards, player2Cards);
+            expected_game_value += this.cfr('', pot, player1Bet, player2Bet, player1Balance, player2Balance, 1, 1, 0, communityCards, player1Cards, player2Cards, smallBlindPlayer);
             // After a hand is completed, handle buy-ins if needed
-            if (this.player1Balance < 10) {
+            if (this.player1Balance < this.bigBlind) {
                 this.buyIn(1);
             }
         
-            if (this.player2Balance < 10) {
+            if (this.player2Balance < this.bigBlind) {
                 this.buyIn(2);
             }
         
@@ -122,7 +113,8 @@ class TexasHoldEm {
                 this.nodeMap[key].updateStrategy();
             }
         }
-        console.log("made it out of cfr loop");
+        console.log("player 1 buy ins: " + this.player1BuyIns)
+        console.log("player 2 buy ins: " + this.player2BuyIns)
         expected_game_value /= iterations;
         this.displayResults(expected_game_value, this.nodeMap);
       }
@@ -132,113 +124,141 @@ class TexasHoldEm {
         return wentAllIn ? history + 'a' : history + actionChar;
       }
 
-      cfr(history, pr1, pr2, round, pot, communityCards, playerCards, opponentCards) {
-        console.log("history: " + history);
-        console.log("round: " + round);
-        console.log("pot: " + pot);
+      cfr(history, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1, pr2, round, communityCards, playerCards, opponentCards, startingPlayer) {
+        console.log("");
+        console.log("pr1: " + pr1)
+        console.log("pr2: " + pr2)
         const n = history.length;
-        const isPlayer1 = n % 2 === 0;
-        const lastAction = history.slice(-1);
+        const isPlayer1 = n % 2 === startingPlayer;
+        let lastAction = history.slice(-1);
+        const lastTwoActions = history.slice(-2);
+
         if (isPlayer1) {
             //update player 2 info
             if (lastAction === 'c') {
-                let bet = this.player1Bet;
-                if (!(bet < this.player2Balance)) {
-                    bet = this.player2Balance
+                let bet = player1Bet  - player2Bet;
+                if (!(bet < player2Balance)) {
+                    bet = player2Balance
                     history = history.slice(0, -1) + "a";
                 }
-                this.pot += bet;
-                this.player2Bet = bet;
-                this.player2Balance -= bet;
+                pot += bet;
+                player2Bet += bet;
+                player2Balance -= bet;
             } else if (lastAction === 'b') {
                 let bet = Math.floor(pot * (2/3));
-                if (!(bet < this.player2Balance)) {
-                    bet = this.player2Balance
+                if (!(bet < player2Balance)) {
+                    bet = player2Balance;
                     history = history.slice(0, -1) + "a";
                 }
-                if (bet > this.player1Balance) {
-                    bet = this.player1Balance;
+                if (bet > (player1Balance + player1Bet - player2Bet)) {
+                    bet = (player1Balance + player1Bet - player2Bet);
                 }
-                this.pot += bet;
-                this.player2Bet = bet;
-                this.player2Balance -= bet;
+                pot += bet;
+                player2Bet += bet;
+                player2Balance -= bet;
             } else if (lastAction === 'x') {
                 let bet = Math.floor(pot * 2);
-                if (!(bet < this.player2Balance)) {
-                    bet = this.player2Balance
+                if (!(bet < player2Balance)) {
+                    bet = player2Balance
                     history = history.slice(0, -1) + "a";
                 }
-                if (bet > this.player1Balance) {
-                    bet = this.player1Balance;
+                if (bet > (player1Balance + player1Bet - player2Bet)) {
+                    bet = (player1Balance + player1Bet - player2Bet);
                 }
-                this.pot += bet;
-                this.player2Bet = bet;
-                this.player2Balance -= bet;
+                pot += bet;
+                player2Bet += bet;
+                player2Balance -= bet;
             } else if (lastAction === 'a') {
-                let bet = this.player2Balance;
-                if (bet > this.player1Balance) {
-                    bet = this.player1Balance;
+                let bet = player2Balance;
+                if (bet > (player1Balance + player1Bet - player2Bet)) {
+                    bet = (player1Balance + player1Bet - player2Bet);
                 }
-                this.pot += bet;
-                this.player2Bet = bet;
-                this.player2Balance -= bet;
+                pot += bet;
+                player2Bet += bet;
+                player2Balance -= bet;
             }
         } else {
             //update player 1 info
             if (lastAction === 'c') {
-                let bet = this.player2Bet;
-                if (!(bet < this.player1Balance)) {
-                    bet = this.player1Balance
+                let bet = player2Bet - player1Bet;
+                if (!(bet < player1Balance)) {
+                    bet = player1Balance
                     history = history.slice(0, -1) + "a";
                 }
-                this.pot += bet;
-                this.player1Bet = bet
-                this.player1Balance -= bet;
+                pot += bet;
+                player1Bet += bet
+                player1Balance -= bet;
             } else if (lastAction === 'b') {
                 let bet = Math.floor(pot * (2/3));
-                if (!(bet < this.player1Balance)) {
-                    bet = this.player1Balance
+                if (!(bet < player1Balance)) {
+                    bet = player1Balance
                     history = history.slice(0, -1) + "a";
                 }
-                if (bet > this.player2Balance) {
-                    bet = this.player2Balance;
+                if (bet > (player2Balance + player2Bet - player1Bet)) {
+                    bet = (player2Balance + player2Bet - player1Bet);
                 }
-                this.pot += bet;
-                this.player1Bet = bet
-                this.player1Balance -= bet;
+                pot += bet;
+                player1Bet += bet
+                player1Balance -= bet;
             } else if (lastAction === 'x') {
                 let bet = Math.floor(pot * 2);
-                if (!(bet < this.player1Balance)) {
-                    bet = this.player1Balance
+                if (!(bet < player1Balance)) {
+                    bet = player1Balance
                     history = history.slice(0, -1) + "a";
                 }
-                if (bet > this.player2Balance) {
-                    bet = this.player2Balance;
+                if (bet > (player2Balance + player2Bet - player1Bet)) {
+                    bet = (player2Balance + player2Bet - player1Bet);
                 }
-                this.pot += bet;
-                this.player1Bet = bet
-                this.player1Balance -= bet;
+                pot += bet;
+                player1Bet += bet
+                player1Balance -= bet;
             } else if (lastAction === 'a') {
-                let bet = this.player1Balance;
-                if (bet > this.player2Balance) {
-                    bet = this.player2Balance;
+                let bet = player1Balance;
+                if (bet > (player2Balance + player2Bet - player1Bet)) {
+                    bet = (player2Balance + player2Bet - player1Bet);
                 }
-                this.pot += bet;
-                this.player1Bet = bet;
-                this.player1Balance -= bet;
+                pot += bet;
+                player1Bet += bet;
+                player1Balance -= bet;
             }
         }
+        
+        // Find all occurrences of two consecutive 'c's
+        const matches = history.match(/cc/g);
 
-        const updatedRound = this.calculateUpdatedRound(history, round);
-        const currentComCards = communityCards[round];
-        const playerHand = isPlayer1 ? playerCards.concat(currentComCards) : opponentCards.concat(currentComCards); 
-        const opponentHand = isPlayer1 ? opponentCards.concat(currentComCards) : playerCards.concat(currentComCards); 
+        // Update the round once for each match
+        const numUpdates = matches ? matches.length : 0;
 
-        if (this.isTerminal(history, round)) {
-          const reward = this.getReward(history, playerHand, opponentHand, pot, round, communityCards[3]);
-          return reward;
+
+        // If the player called the last bet or both players checked, progress to the next round
+        if ((lastTwoActions === 'cc' && numUpdates > round) || lastTwoActions === 'bc' || lastTwoActions === 'xc') {
+            player1Bet = 0;
+            player2Bet = 0;
+            round++;
         }
       
+        const currentComCards = communityCards[round];
+
+        const playerHand = isPlayer1 ? playerCards.concat(currentComCards) : opponentCards.concat(currentComCards); 
+
+        console.log("isPlayer1: " + isPlayer1)
+        console.log("history: " + history);
+        console.log("round: " + round);
+        console.log("player1 current bet: " + player1Bet)
+        console.log("player1 Balance: " + player1Balance);
+        console.log("player2 current bet: " + player2Bet)
+        console.log("player2 Balance: " + player2Balance);
+        console.log("pot: " + pot);
+        console.log("Player Cards: " + playerCards);
+        console.log("Opponent Cards: " + opponentCards);
+        console.log("current Community cards: " + currentComCards);
+        
+        if (this.isTerminal(history, round)) {
+          const reward = this.getReward(history, playerCards, opponentCards, round, communityCards[3], pot, player1Balance, player2Balance);
+          console.log("Reward: " + reward);
+          return reward;
+        }
+
         const node = this.getNode(playerHand, history);
         console.log("Node: " + node);
         const strategy = node.strategy;
@@ -247,13 +267,29 @@ class TexasHoldEm {
       
         // Counterfactual utility per action.
         const actionUtils = new Array(this.n_actions).fill(0);
-      
-        for (let act = 0; act < this.n_actions; act++) {
-            const nextHistory = history + node.actionDict[act]
-            if (isPlayer1) {
-                actionUtils[act] = -1 * this.cfr(nextHistory, pr1 * strategy[act], pr2, updatedRound, this.pot, communityCards, playerCards, opponentCards);
-            } else {
-                actionUtils[act] = -1 * this.cfr(nextHistory, pr1, pr2 * strategy[act], updatedRound, this.pot, communityCards, playerCards, opponentCards);
+        
+        lastAction = history.slice(-1);
+        if (lastAction === 'a') {
+            for (let act = 0; act < 2; act++) {
+                //if (node.regretSum[act] > 0.000000001) {
+                  const nextHistory = history + node.actionDict[act]
+                  if (isPlayer1) {
+                      actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1 * strategy[act], pr2, round, communityCards, playerCards, opponentCards, startingPlayer);
+                  } else {
+                      actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1, pr2 * strategy[act], round, communityCards, playerCards, opponentCards, startingPlayer);
+                  }
+              //}
+            }
+        } else {
+            for (let act = 0; act < this.n_actions; act++) {
+                //if (node.regretSum[act] > 0.000000001) {
+                  const nextHistory = history + node.actionDict[act]
+                  if (isPlayer1) {
+                      actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1 * strategy[act], pr2, round, communityCards, playerCards, opponentCards, startingPlayer);
+                  } else {
+                      actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1, pr2 * strategy[act], round, communityCards, playerCards, opponentCards, startingPlayer);
+                  }
+                //}
             }
         }
       
@@ -266,36 +302,26 @@ class TexasHoldEm {
             }
         }
         const regrets = actionUtils.map(val => val - util);
-        
+        console.log("Regrets: " + regrets)
         if (isPlayer1) {
             node.reachPr += pr1;
+            console.log("node.reachPr: " + node.reachPr)
             for (let i = 0; i < node.regretSum.length; i++) {
                 node.regretSum[i] += pr2 * regrets[i];
             }           
         } else {
             node.reachPr += pr2;
+            console.log("node.reachPr: " + node.reachPr)
             for (let i = 0; i < node.regretSum.length; i++) {
                 node.regretSum[i] += pr1 * regrets[i];
             } 
         }
+        console.log("node.regretSum: " + node.regretSum);
+        console.log("node.strategySum: " + node.strategySum)
         console.log("util: " + util)
         return util;
       }
       
-      
-    calculateUpdatedRound(history, round) {
-        const lastAction = history.slice(-1);
-        const lastTwoActions = history.slice(-2);
-      
-        // If the player called the last bet or both players checked, progress to the next round
-        if (lastTwoActions === 'cc' || (lastAction === 'c' && lastTwoActions !== 'ac')) {
-            this.player1Bet = 0;
-            this.player2Bet = 0;
-            return round + 1;
-        }
-      
-        return round;
-    }
         
     isTerminal(history, round) {
         const lastAction = history.slice(-1);
@@ -303,55 +329,53 @@ class TexasHoldEm {
         
         // Player folds
         if (lastAction === 'f') {
-            console.log("terminal node reached.")
             return true;
         }
         
         // All-in and call
         if (lastTwoActions === 'ac') {
-            console.log("terminal node reached.")
             return true;
         }
 
         if (lastTwoActions === 'aa') {
-            console.log("terminal node reached.")
             return true;
         }
         
         // Showdown after the river betting round
         if (round === 4 && (lastTwoActions === 'cc' || lastTwoActions === 'bc' || lastTwoActions === 'xc')) {
-            console.log("terminal node reached.")
             return true;
         }
         
         return false;
     }
       
-    getReward(history, playerHand, opponentHand, pot, round, communityCards) {
+    getReward(history, playerCards, opponentCards, round, communityCards, pot, player1Balance, player2Balance) {
         const lastAction = history.slice(-1);
         const lastTwoActions = history.slice(-2);
-      
         // Player folds
         if (lastAction === 'f') {
           if (history.length % 2 === 0) { // Player 2 folds
-            return pot;
+            return pot + player1Balance - this.startingBalance;
           } else { // Player 1 folds
-            return -pot;
+            return this.startingBalance - player2Balance - pot;
           }
         }
       
         // All-in and call, or showdown after river betting round
         if (lastTwoActions === 'aa' || lastTwoActions === 'ac' || (round === 4 && (lastTwoActions === 'cc' || lastTwoActions === 'bc' || lastTwoActions === 'xc'))) {
-          const winner = determineWinnerT(playerHand, opponentHand, communityCards)
+          const hand1 = playerCards.concat(communityCards);
+          const hand2 = opponentCards.concat(communityCards);
+          const winner = determineWinnerTrain(hand1, hand2)
+          console.log("The winner is: " + winner);
           if (winner === 1) {
-            return pot;
+            return pot + player1Balance - this.startingBalance;
           } else if (winner === 2) {
-            return -pot;
+            return this.startingBalance - player2Balance - pot;
           } else {
             return 0; // Tie, split pot
           }
         }
-      
+        console.log("THIS SHOULD NOT BE PRINTED")
         return 0; // Not a terminal state
       }
         
@@ -420,5 +444,12 @@ class Node {
 
 }
 
+function main() {
+    const pokerGame = new TexasHoldEm();
+    const numIterations = 1; // Choose the number of iterations to run
+    pokerGame.train(numIterations);
+}
+  
+main();
 
-export default TexasHoldEm;
+//export default TexasHoldEm;

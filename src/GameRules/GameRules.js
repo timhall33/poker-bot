@@ -1,7 +1,7 @@
-import { getPot } from "../components/Money/Money";
-import { player1, player2 } from "../components/StartGame/StartGame";
+//import { getPot } from "../components/Money/Money";
+//import { player1, player2 } from "../components/StartGame/StartGame";
 
-export function getHandRank(hand) {
+function getHandRank(hand) {
     if (hasStraightFlush(hand)) {
         return hasStraightFlush(hand);
     } else if (hasFourOfAKind(hand)) {
@@ -471,7 +471,7 @@ function hasStraight(hand) {
   
 
 
-export function determineWinner(hand1, hand2) {
+function determineWinner(hand1, hand2) {
     const handRank1 = getHandRank(hand1);
     const handRank2 = getHandRank(hand2);
     if (handRank1[0] > handRank2[0]) {
@@ -497,13 +497,18 @@ export function determineWinner(hand1, hand2) {
     }
 }
 
-export function determineWinnerT(hand1, hand2, communityCards) {
-  const fullHand1 = hand1 + "," + communityCards;
-  const fullHand2 = hand2 + "," + communityCards;
+function determineWinnerT(playerHand, opponentHand, communityCards) {
+  const fullHand1 = playerHand + "," + communityCards;
+  const fullHand2 = opponentHand + "," + communityCards;
   const fullHand1A = fullHand1.split(',');
   const fullHand2A = fullHand2.split(',');
   const handRank1 = getHandRank(fullHand1A);
   const handRank2 = getHandRank(fullHand2A);
+  console.log("community Cards: " + communityCards)
+  console.log("playerHand: " + fullHand1A);
+  console.log("opponentHand: " + fullHand2A);
+  console.log("Player Rank: " + handRank1);
+  console.log("Opponent Rank: " + handRank2);
   if (handRank1[0] > handRank2[0]) {
       return 1;
   } else if (handRank2[0] > handRank1[0]) {
@@ -519,3 +524,24 @@ export function determineWinnerT(hand1, hand2, communityCards) {
     return 0;
   }
 }
+
+function determineWinnerTrain(playerHand, opponentHand) {
+  const handRank1 = getHandRank(playerHand);
+  const handRank2 = getHandRank(opponentHand);
+  if (handRank1[0] > handRank2[0]) {
+      return 1;
+  } else if (handRank2[0] > handRank1[0]) {
+      return 2;
+  } else {
+      for (let i = 1; i < handRank1.length; i++) {
+          if (handRank1[i] > handRank2[i]) {
+              return 1;
+          } else if (handRank2[i] > handRank1[i]) {
+              return 2;
+          }
+      }
+    return 0;
+  }
+}
+
+module.exports = { determineWinnerTrain };
