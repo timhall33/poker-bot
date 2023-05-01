@@ -1,7 +1,7 @@
-//import { getPot } from "../components/Money/Money";
-//import { player1, player2 } from "../components/StartGame/StartGame";
+import { getPot } from "../components/Money/Money";
+import { player1, player2 } from "../components/StartGame/StartGame";
 
-function getHandRank(hand) {
+export function getHandRank(hand) {
     if (hasStraightFlush(hand)) {
         return hasStraightFlush(hand);
     } else if (hasFourOfAKind(hand)) {
@@ -471,23 +471,23 @@ function hasStraight(hand) {
   
 
 
-function determineWinner(hand1, hand2) {
+export function determineWinner(hand1, hand2) {
     const handRank1 = getHandRank(hand1);
     const handRank2 = getHandRank(hand2);
     if (handRank1[0] > handRank2[0]) {
-        player1.addMoney(getPot());
+        //player1.addMoney(getPot());
         return "You Win!";
     } else if (handRank2[0] > handRank1[0]) {
-        player2.addMoney(getPot());
+        //player2.addMoney(getPot());
         return "Bot wins.";
     } else {
         for (let i = 1; i < handRank1.length; i++) {
             if (handRank1[i] > handRank2[i]) {
                 console.log("hand 1 wins.");
-                player1.addMoney(getPot());
+                //player1.addMoney(getPot());
                 return "You Win!";
             } else if (handRank2[i] > handRank1[i]) {
-                player2.addMoney(getPot());
+                //player2.addMoney(getPot());
                 return "Bot wins.";
             }
         }
@@ -495,34 +495,6 @@ function determineWinner(hand1, hand2) {
         player2.addMoney(getPot()/2);
         return "Tie.";
     }
-}
-
-function determineWinnerT(playerHand, opponentHand, communityCards) {
-  const fullHand1 = playerHand + "," + communityCards;
-  const fullHand2 = opponentHand + "," + communityCards;
-  const fullHand1A = fullHand1.split(',');
-  const fullHand2A = fullHand2.split(',');
-  const handRank1 = getHandRank(fullHand1A);
-  const handRank2 = getHandRank(fullHand2A);
-  console.log("community Cards: " + communityCards)
-  console.log("playerHand: " + fullHand1A);
-  console.log("opponentHand: " + fullHand2A);
-  console.log("Player Rank: " + handRank1);
-  console.log("Opponent Rank: " + handRank2);
-  if (handRank1[0] > handRank2[0]) {
-      return 1;
-  } else if (handRank2[0] > handRank1[0]) {
-      return 2;
-  } else {
-      for (let i = 1; i < handRank1.length; i++) {
-          if (handRank1[i] > handRank2[i]) {
-              return 1;
-          } else if (handRank2[i] > handRank1[i]) {
-              return 2;
-          }
-      }
-    return 0;
-  }
 }
 
 function determineWinnerTrain(playerHand, opponentHand) {
@@ -543,5 +515,3 @@ function determineWinnerTrain(playerHand, opponentHand) {
     return 0;
   }
 }
-
-module.exports = { determineWinnerTrain };

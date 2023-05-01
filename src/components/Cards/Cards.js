@@ -1,5 +1,5 @@
-const { React } = require ('react');
-//require ('./Cards.css');
+import React from 'react';
+import './Cards.css';
 
 const cardImages = {
   '2C': "/images/2_of_clubs.png",
@@ -63,7 +63,7 @@ const cardImages = {
     }
     return deck;
   }
-  /*
+  
   export const getHandCards = (nums, num1, num2) => {
     const card1 = Object.keys(cardImages)[nums[num1]];
     const card2 = Object.keys(cardImages)[nums[num2]];
@@ -78,7 +78,8 @@ const cardImages = {
     const card3 = Object.keys(cardImages)[nums[49]];
     const card4 = Object.keys(cardImages)[nums[50]];
     const card5 = Object.keys(cardImages)[nums[51]];
-    const cards = [card1, card2, card3, card4, card5];
+
+    const cards = [[],[card1, card2, card3],[card1, card2, card3, card4],[card1, card2, card3, card4, card5]];
     return cards;
   }
 
@@ -156,6 +157,3 @@ const cardImages = {
     }
     return array;
   }
-  */
-
-  module.exports = { createDeck };

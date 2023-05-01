@@ -31,20 +31,24 @@ const RenderMoneyInHand = () => {
   
     const renderMoneyBox = () => {
       const totalMoney = player1.getMoney();
+      const playerWinnings = player1.getWinnings();
       return (
         <div className="money-box">
           <h2>My Money</h2>
-          <p>Total Amount: ${totalMoney}</p>
+          <p>Current Amount: ${totalMoney}</p>
+          <p>Total Winnings: ${playerWinnings}</p>
         </div>
       );
     };
 
     const renderBotMoneyBox = () => {
         const botMoney = player2.getMoney();
+        const botWinnings = player2.getWinnings();
         return (
             <div className="bot-money-box">
                 <h2>Bot Money</h2>
-                <p>Total Amount: ${botMoney}</p>
+                <p>Current Amount: ${botMoney}</p>
+                <p>Total Winnings: ${botWinnings}</p>
             </div>
         );
       };
