@@ -19,7 +19,6 @@ class TexasHoldEm {
     displayResults(expectedGameValue, nodeMap) {
         console.log(`Player 1 expected value: ${expectedGameValue}`);
         console.log(`Player 2 expected value: ${-1 * expectedGameValue}`);
-        //console.log("\nPlayer 1 strategies:");
         const sortedKeys = Object.keys(nodeMap).sort();
         for (const key of sortedKeys) {
             console.log(nodeMap[key].toString());
@@ -57,7 +56,7 @@ class TexasHoldEm {
             let player2Balance = this.startingBalance;
             let player1Bet = 0;
             let player2Bet = 0;
-            this.shuffleArray(this.deck);
+            this.shuffleArray(this.deck); // shuffles the deck
             const smallBlindPlayer = i % 2 === 0 ? 0 : 1;
             if (smallBlindPlayer === 0) {
                 player1Balance -= this.smallBlind;
@@ -81,29 +80,17 @@ class TexasHoldEm {
                 this.nodeMap[key].updateStrategy();
             }
         }
-        /*
-        console.log("player 1 buy ins: " + this.player1BuyIns)
-        console.log("player 2 buy ins: " + this.player2BuyIns)
-        */
         expected_game_value /= iterations;
         this.displayResults(expected_game_value, this.nodeMap);
       }
-      
-      generateNextHistory(history, actionDict, actionIndex, wentAllIn) {
-        const actionChar = actionDict[actionIndex];
-        return wentAllIn ? history + 'a' : history + actionChar;
-      }
 
       cfr(history, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1, pr2, round, communityCards, playerCards, opponentCards, startingPlayer) {
-        /*console.log("");
-        console.log("pr1: " + pr1)
-        console.log("pr2: " + pr2)
-        */
         const n = history.length;
         const isPlayer1 = n % 2 === startingPlayer;
         let lastAction = history.slice(-1);
         const lastTwoActions = history.slice(-2);
 
+        // Game Tree for Poker Varient
         if (isPlayer1) {
             //update player 2 info
             if (lastAction === 'c') {
@@ -193,14 +180,8 @@ class TexasHoldEm {
                 player1Balance -= bet;
             }
         }
-        
-        // Find all occurrences of two consecutive 'c's
-        //const matches = history.match(/cc/g);
 
-        // Update the round once for each match
-        //const numUpdates = matches ? matches.length : 0;
-
-        
+        // count number of game updates
         let numUpdates = 0;
         for (let i = 1; i < history.length; i++) {
             let last = history[i - 1];
@@ -224,31 +205,15 @@ class TexasHoldEm {
         }
       
         const currentComCards = communityCards[round];
-
         const playerHand = isPlayer1 ? playerCards.concat(currentComCards) : opponentCards.concat(currentComCards); 
-/*
-        console.log("isPlayer1: " + isPlayer1)
-        console.log("history: " + history);
-        console.log("round: " + round);
-        console.log("player1 current bet: " + player1Bet)
-        console.log("player1 Balance: " + player1Balance);
-        console.log("player2 current bet: " + player2Bet)
-        console.log("player2 Balance: " + player2Balance);
-        console.log("pot: " + pot);
-        console.log("Player Cards: " + playerCards);
-        console.log("Opponent Cards: " + opponentCards);
-        console.log("current Community cards: " + currentComCards);
-        */
         if (this.isTerminal(history, round)) {
           const reward = this.getReward(history, playerCards, opponentCards, round, communityCards[3], pot, player1Balance, player2Balance);
-          //console.log("Reward: " + reward);
           return reward;
         }
 
+        // get the current node and strategy
         const node = this.getNode(playerCards, communityCards[round], lastAction, round, pot);
-        //console.log("Node: " + node);
         const strategy = node.strategy;
-        //console.log("strat: " + strategy)
         
       
         // Counterfactual utility per action.
@@ -257,30 +222,25 @@ class TexasHoldEm {
         lastAction = history.slice(-1);
         if (lastAction === 'a' || lastAction === 'b' || lastAction === 'x') {
             for (let act = 0; act < 2; act++) {
-                //if (node.regretSum[act] > 0.000000001) {
-                  const nextHistory = history + node.actionDict[act]
-                  if (isPlayer1) {
-                      actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1 * strategy[act], pr2, round, communityCards, playerCards, opponentCards, startingPlayer);
-                  } else {
-                      actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1, pr2 * strategy[act], round, communityCards, playerCards, opponentCards, startingPlayer);
-                  }
-              //}
+                const nextHistory = history + node.actionDict[act]
+                if (isPlayer1) {
+                    actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1 * strategy[act], pr2, round, communityCards, playerCards, opponentCards, startingPlayer);
+                } else {
+                    actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1, pr2 * strategy[act], round, communityCards, playerCards, opponentCards, startingPlayer);
+                }
             }
         } else {
             for (let act = 0; act < this.n_actions; act++) {
-                //if (node.regretSum[act] > 0.000000001) {
                   const nextHistory = history + node.actionDict[act]
                   if (isPlayer1) {
                       actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1 * strategy[act], pr2, round, communityCards, playerCards, opponentCards, startingPlayer);
                   } else {
                       actionUtils[act] = -1 * this.cfr(nextHistory, pot, player1Bet, player2Bet, player1Balance, player2Balance, pr1, pr2 * strategy[act], round, communityCards, playerCards, opponentCards, startingPlayer);
                   }
-                //}
             }
         }
       
         // Utility of information set.
-       
         let util = 0;
         if (actionUtils.length === strategy.length) {
             for (let i = 0; i < actionUtils.length; i++) {
@@ -288,23 +248,18 @@ class TexasHoldEm {
             }
         }
         const regrets = actionUtils.map(val => val - util);
-        //console.log("Regrets: " + regrets)
+        // update reach probability
         if (isPlayer1) {
             node.reachPr += pr1;
-            //console.log("node.reachPr: " + node.reachPr)
             for (let i = 0; i < node.regretSum.length; i++) {
                 node.regretSum[i] += pr2 * regrets[i];
             }           
         } else {
             node.reachPr += pr2;
-            //console.log("node.reachPr: " + node.reachPr)
             for (let i = 0; i < node.regretSum.length; i++) {
                 node.regretSum[i] += pr1 * regrets[i];
             } 
         }
-        //console.log("node.regretSum: " + node.regretSum);
-        //console.log("node.strategySum: " + node.strategySum)
-        //console.log("util: " + util)
         return util;
       }
       
@@ -323,6 +278,7 @@ class TexasHoldEm {
             return true;
         }
 
+        // Both players go all in
         if (lastTwoActions === 'aa') {
             return true;
         }
@@ -369,7 +325,6 @@ class TexasHoldEm {
         const cards = playercards.concat(communityCards);
         const lastAction = action;
         const cardBucket = getHandRank(cards)[0];
-        //console.log("cardBucket: " + cardBucket);
         const nodeRound = round;
         let potVal = 0;
         if (pot <= 200 ) {
@@ -379,8 +334,6 @@ class TexasHoldEm {
         } else {
             potVal = 2;
         }
-        //const sortedCard = card.slice().sort(); 
-        //const key = `${sortedCard.join(' ')} ${history}`; 
         const key = `${cardBucket} ${lastAction} ${nodeRound} ${potVal}`
         if (!this.nodeMap.hasOwnProperty(key)) {
             const actionDict = {0: 'f', 1: 'c', 2: 'b', 3: 'x', 4: 'a'};
@@ -643,7 +596,7 @@ function hasStraightFlush(hand) {
       }
     }
   
-    return 0; // Return [0] for no four of a kind
+    return 0; // Return 0 for no four of a kind
 }
   
 
@@ -692,7 +645,7 @@ function hasFullHouse(hand) {
       return [7, threeOfAKindRank, pairRank];
     }
   
-    return 0; // Return [0] for no full house
+    return 0; // Return 0 for no full house
   }
   
 
@@ -835,7 +788,7 @@ function hasStraight(hand) {
       return [4, threeOfAKindRank, additionalRanks[0], additionalRanks[1]];
     }
   
-    return 0; // Return [0] for no three of a kind
+    return 0; // Return 0 for no three of a kind
   }
   
   function hasTwoPair(hand) {
@@ -901,7 +854,7 @@ function hasStraight(hand) {
         return [3, pairRanks[0], pairRanks[1], Math.max(pairRanks[2], ...remainingRanks)];
     }
 
-    return 0; // Return [0] for no two pair
+    return 0; // Return 0 for no two pair
 }
 
 
@@ -1064,7 +1017,7 @@ let strategies;
 
 function main() {
     const pokerGame = new TexasHoldEm();
-    const numIterations = 100000; // Choose the number of iterations to run
+    const numIterations = 1; // Choose the number of iterations to run
     const startTime = performance.now();
     pokerGame.train(numIterations);
     strategies = Object.fromEntries(

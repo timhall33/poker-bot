@@ -35,6 +35,12 @@ const DealButton = () => {
   const [round, setRound] = useState(0);
 
 
+  useEffect(() => {
+    if (nums) {
+      setMiddleCardLetters(getMiddleCards(nums)[round]);
+    }
+  }, [round]);
+
   const updateBotAction = (action, holeCards, communityCards, pot, round, newNums) => {
     const lastAction = history.slice(-1);
     let options = ['f', 'c', 'b', 'x', 'a'];
@@ -50,6 +56,7 @@ const DealButton = () => {
         setHistory((prev) => {
           const updatedHistory = prev + 'a'
           const betSize = player2.getMoney();
+          console.log("BETSIZE: " + betSize)
           player2.removeMoney(betSize);
           handleBotBetAmountChange(betSize);
           updateRound(updatedHistory);
@@ -71,22 +78,26 @@ const DealButton = () => {
           if (player2.getMoney() < betSize) {
             betSize = player2.getMoney();
           }
+          console.log("BETSIZE: " + betSize)
           player2.removeMoney(betSize);
           handleBotBetAmountChange(betSize);
           updateRound(updatedHistory);
           return updatedHistory
         });
       } else if (botAction === 'x') {
+        let test = true;
         setHistory((prev) => {
           const updatedHistory = prev + 'x'
           let betSize = Math.floor(getPot() * 2);
           if (player2.getMoney() < betSize) {
             betSize = player2.getMoney();
           }
+          console.log("BETSIZE: " + betSize)
           player2.removeMoney(betSize);
           handleBotBetAmountChange(betSize);
           updateRound(updatedHistory);
           return updatedHistory
+
         });
       } else {
         const betsize = (getPot() - playerBetAmount)/2;
@@ -154,8 +165,6 @@ const DealButton = () => {
         setMiddleCards(newMiddleCards);
       }
       setRound((prev) => prev + 1);
-      const curRound = round;
-      setMiddleCardLetters(getMiddleCards(nums)[curRound + 1]);
     }    
     if (lastTwoActions === 'ac') {
       const winner = determineWinner(myFullHand, botFullHand)
@@ -190,7 +199,7 @@ const DealButton = () => {
     }
     
     // Showdown after the river betting round
-    if (round === 4 && (lastTwoActions === 'cc' || lastTwoActions === 'bc' || lastTwoActions === 'xc')) {
+    if (round === 4 && ((lastTwoActions === 'cc' && numUpdates > round) || lastTwoActions === 'bc' || lastTwoActions === 'xc')) {
       const winner = determineWinner(myFullHand, botFullHand)
       setWinner(winner);
       if (winner === "Bot wins.") {
@@ -262,6 +271,7 @@ const DealButton = () => {
     //updateRound();
 };
 
+// player checks
 const handleCheckClick = () => {
   setHistory((prev) => {
     const updatedHistory = prev + 'c';
@@ -273,6 +283,7 @@ const handleCheckClick = () => {
   });
 };
 
+// player bets 2/3 pot
 const handleBet1Click = () => {
   setHistory((prev) => {
     const updatedHistory = prev + 'b'
@@ -287,6 +298,7 @@ const handleBet1Click = () => {
   });
 };
 
+// player bets 2x pot
 const handleBet2Click = () => {
   setHistory((prev) => {
     const updatedHistory = prev + 'x'
@@ -301,6 +313,7 @@ const handleBet2Click = () => {
   });
 };
 
+// player goes all in
 const handleBet3Click = () => {
   setHistory((prev) => {
     const updatedHistory = prev + 'a'
@@ -312,6 +325,7 @@ const handleBet3Click = () => {
   });
 };
 
+// player folds
 const handleFoldClick = () => {
   setHistory((prev) => {
     const updatedHistory = prev + 'f'
@@ -326,9 +340,6 @@ const handleFoldClick = () => {
   });
 };
 
-/*useEffect(() => {
-  // this will re-render the component when `history` changes
-}, [histo*/
   return (
     <div>
       <RenderMoneyInHand />
