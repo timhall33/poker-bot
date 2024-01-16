@@ -1,20 +1,19 @@
 # **Development of a Texas Hold'em Poker Bot Using a Simplified Counterfactual Regret Minimization Algorithm**
 
-Timothy Hall
-Franklin College of Arts and Sciences
- University of Georgia
-Athens, Ga
-tdh22457@uga.edu
+Timothy Hall  
+Franklin College of Arts and Sciences  
+University of Georgia  
+Athens, Ga  
 
 **ABSTRACT**
 
 In this paper, I present the development of a Texas Hold'em poker bot using a simplified variant of the Counterfactual Regret Minimization (CFR) algorithm, inspired by Libratus, a world-class poker bot. Our implementation addresses the computational challenges by reducing the game tree, employing betting restrictions, and clustering similar hands together for strategy sharing. The bot is trained on a 2-core Mac computer for 100,000 iterations which took a little over 1 hour, significantly less than Libratus' 15 million core hours. The resulting poker bot is deployed on a user interface created with React, allowing users to interactively play against the bot.
 
-1 ** Introduction**
+1 **Introduction**
 
 Texas Hold'em poker is a complex, non-cooperative game that requires strategic decision-making under imperfect information. In recent years, artificial intelligence has shown significant success in mastering this game, with bots like Libratus defeating top human players. Our goal is to create a simplified version of a poker bot using the CFR algorithm while addressing the computational limitations and complexity of the game tree.
 
-2 ** Background and Related Work**
+2 **Background and Related Work**
 
 2.1. Libratus and CFR Algorithm
 
@@ -32,7 +31,7 @@ The CFR algorithm aims to minimize regret by considering counterfactual outcomes
 
 Several studies have explored the development of poker bots using various techniques. Lisy and Bowling [1] investigated the equilibrium approximation quality of current no-limit poker bots. Yuan et al. [2] developed EnsembleCard, a strategy ensemble bot for two-player no-limit Texas Hold'em poker. Watson et al. [3] focused on improving a case-based Texas Hold'em poker bot.
 
-3 ** Methodology**
+3 **Methodology**
 
 3.1. Game Tree Reduction
 
@@ -46,13 +45,17 @@ In poker, there are 2.5 million different hand combinations (combinations of 5 c
 
 The CFR algorithm recursively traverses the game tree, calculating regrets at terminal nodes. After each iteration, the strategy is updated based on accumulated regrets. The algorithm also tracks the probability of reaching each node to factor this information into optimal strategy calculations.
 
-**1 Iteration: No re-raises (0.6 seconds)**
+3.4. Diagram
 
-**1 Iteration: Unlimited re-raises (14 minutes)**
+1 Iteration: No re-raises (0.6 seconds)
 
-3 ![](RackMultipart20240116-1-b0vq2u_html_f7918854b25796ac.png) ![](RackMultipart20240116-1-b0vq2u_html_d2810c66a4b74f96.png) .4. Diagram
+<img width="241" alt="image" src="https://github.com/timhall33/poker-bot/assets/113381294/8b523405-9ab9-4b34-bd95-bed8136a2579">
 
-4 ** Implementation and Deployment**
+1 Iteration: Unlimited re-raises (14 minutes)
+
+<img width="243" alt="image" src="https://github.com/timhall33/poker-bot/assets/113381294/c8188e56-6963-4c77-a94f-48e382515732">
+
+4 **Implementation and Deployment**
 
 4.1. Training the Bot
 
@@ -62,7 +65,7 @@ The poker bot was trained for a little over an hour, completing 100,000 iteratio
 
 The poker bot is deployed on a user interface created with React, allowing users to interactively play against the bot. The interface considers each player's current bet, the pot size, and the total amount of money won. An explanation of the implementation can be found in the README.md file in the project repository. A playthrough demonstrating the poker bot in action can be found at [4].
 
-5 ** Conclusion**
+5 **Conclusion**
 
 I have presented a simplified poker bot that employs a variant of the CFR algorithm used in Libratus. By reducing the game tree and clustering similar hands together, I addressed the computational challenges inherent in Texas Hold'em poker. Our implementation demonstrates the potential for developing competitive poker bots with limited computational resources.
 
